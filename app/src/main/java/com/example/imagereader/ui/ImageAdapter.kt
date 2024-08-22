@@ -3,19 +3,14 @@ package com.example.imagereader.ui
 import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
-import android.media.Image
-import android.net.Uri
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
-import android.widget.ImageButton
-import android.widget.ImageView
 import android.widget.PopupMenu
 import android.widget.Toast
-import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.FileProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.imagereader.ImageDetailActivity
@@ -154,11 +149,16 @@ class ImageAdapter(private val imageEntities: List<ImageEntity>,
 
     private fun handleSendAction(position: Int) {
         val currentImageEntity = imageEntities[position]
+        val imageFile = File(currentImageEntity.imagePath)
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", imageFile)
+
         val shareIntent: Intent = Intent().apply {
             action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_STREAM, currentImageEntity.imagePath)
+            putExtra(Intent.EXTRA_STREAM, uri)
             type = "image/*"
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
         }
-        context.startActivity(shareIntent)
+        context.startActivity(Intent.createChooser(shareIntent, "Share Image"))
     }
 }
+
